@@ -1,16 +1,18 @@
 import PropTypes from 'prop-types';
 
-const UIButton = ( { name } ) => {
+const UIButton = ( { name, classColor, callback } ) => {
 
     return (
         <>
-        <button>{name}5656</button>
+        <button onClick={callback} className={classColor}>{name}</button>
         </>
     )
 }
 
 UIButton.propTypes = {
-    name: PropTypes.string.isRequired
+    name: PropTypes.string.isRequired,
+    classColor: PropTypes.string.isRequired,
+    callback: PropTypes.func
 }
 
 export { UIButton}
