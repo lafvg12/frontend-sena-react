@@ -2,11 +2,17 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import { Converter } from './components/Converter';
 import { UIButton } from './components/Button';
+import { UIUsers } from './components/users';
 
 function App() {
   const [usuario, setUsuario] = useState('');
   const [clave, setClave] = useState('');
   const [logueado, setLogueado] = useState(false);
+
+  const [passwordRegister, setPasswordRegister] = useState('');
+  const [userRegister, setUserRegister] = useState('');
+
+  const [users, setUsers] = useState([]);
 
   function setUser(event) {
     setUsuario(event.target.value);
@@ -14,6 +20,36 @@ function App() {
 
   function setPassword(event) {
     setClave(event.target.value);
+  }
+
+  function handleRegisterUser(event){
+    setUserRegister(event.target.value);
+  }
+
+  function handleRegisterPassword(event){
+    setPasswordRegister(event.target.value);
+  }
+
+  async function registerNewUser(event){
+    event.preventDefault();
+    const data = {
+      usuario: userRegister,
+      clave: passwordRegister
+    };
+    const allData = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    };
+    
+    try {
+      await fetch('http://localhost:3000/register', allData);
+      fetchUsers();
+    } catch(error) {
+      console.error(error);
+    }
   }
 
   async function loginBasic(event) {
@@ -38,6 +74,7 @@ function App() {
 
     if (peticion.ok) {
       setLogueado(true);
+      fetchUsers();
     } else {
       alert('Not authorized');
     }
@@ -54,9 +91,55 @@ function App() {
     const peticion = await fetch('http://localhost:3000/validate', data);
     if (peticion.ok) {
       setLogueado(true);
-    }else{
+      fetchUsers();
+    } else {
       localStorage.removeItem('token');
       setLogueado(false);
+    }
+  }
+
+  async function fetchUsers() {
+    const data = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('token')
+      }
+    };
+    const response = await fetch('http://localhost:3000/users', data);
+    const users = await response.json();
+    setUsers(users);
+  }
+
+  async function deleteUser(id) {
+    const data = {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('token')
+      }
+    };
+    await fetch(`http://localhost:3000/users/${id}`, data);
+    fetchUsers();   }
+
+  async function editUser(user) {
+    const newUsuario = prompt('Enter new username:', user.usuario);
+    const newClave = prompt('Enter new password:', '');
+    if (newUsuario && newClave) {
+      const data = {
+        usuario: newUsuario,
+        clave: newClave
+      };
+      const allData = {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        },
+        body: JSON.stringify(data)
+      };
+      await fetch(`http://localhost:3000/users/${user.id}`, allData);
+      fetchUsers();
     }
   }
 
@@ -65,33 +148,70 @@ function App() {
   }, []);
 
   if (logueado) {
-    return <Converter />;
+    return (
+      <>
+        <Converter />
+        <div className="user-list">
+          {users.map(user => (
+            <UIUsers key={user.id} data={user} onDelete={deleteUser} onEdit={editUser} />
+          ))}
+        </div>
+      </>
+    );
   }
 
   return (
     <>
-      <h1>Login</h1>
-      <form className="form">
-        <input
-          className='input'
-          placeholder="user"
-          type="text"
-          name="usuario"
-          id="usuario"
-          value={usuario}
-          onChange={setUser}
-        />
-        <input
-          className='input'
-          placeholder="password"
-          type="password"
-          name="clave"
-          id="clave"
-          value={clave}
-          onChange={setPassword}
-        />
-        <UIButton name='Send' classColor='button-input'  callback={loginBasic}/>
-      </form>
+      <div style={{display:'flex', gap: '12px'}}>
+        <div>
+          <h1>Login</h1>
+          <form className="form">
+            <input
+              className='input'
+              placeholder="user"
+              type="text"
+              name="usuario"
+              id="usuario"
+              value={usuario}
+              onChange={setUser}
+            />
+            <input
+              className='input'
+              placeholder="password"
+              type="password"
+              name="clave"
+              id="clave"
+              value={clave}
+              onChange={setPassword}
+            />
+            <UIButton name='Send' classColor='button-input' callback={loginBasic}/>
+          </form>
+        </div> 
+        <div>
+          <h1>Register</h1>
+          <form className="form">
+            <input
+              className='input'
+              placeholder="user"
+              type="text"
+              name="usuario"
+              id="usuario"
+              value={userRegister}
+              onChange={handleRegisterUser}
+            />
+            <input
+              className='input'
+              placeholder="password"
+              type="password"
+              name="clave"
+              id="clave"
+              value={passwordRegister}
+              onChange={handleRegisterPassword}
+            />
+            <UIButton name='Send' classColor='button-input' callback={registerNewUser}/>
+          </form>
+        </div>
+      </div>
     </>
   );
 }
