@@ -3,12 +3,12 @@ import './users.css';
 import { UIButton } from '../Button';
 
 export const UIUsers = ({ data, onDelete, onEdit }) => {
-  const { id, usuario, rol } = data;
+  const { id, email, rol } = data;
 
   return (
     <div className='container-users'>
       <p>{id}</p>
-      <h3>{usuario}</h3>
+      <h3>{email}</h3>
       <p>{rol || 'admin'}</p>
       <UIButton name='delete' classColor='button-users' callback={() => onDelete(id)} />
       <UIButton name='edit' classColor='button-users' callback={() => onEdit(data)} />

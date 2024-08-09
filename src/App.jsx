@@ -11,6 +11,7 @@ function App() {
 
   const [passwordRegister, setPasswordRegister] = useState('');
   const [userRegister, setUserRegister] = useState('');
+  const [emailRegister, setEmailRegister] = useState('');
 
   const [users, setUsers] = useState([]);
 
@@ -30,11 +31,16 @@ function App() {
     setPasswordRegister(event.target.value);
   }
 
+  function handleRegisterEmail(event){
+    setEmailRegister(event.target.value);
+  }
+
   async function registerNewUser(event){
     event.preventDefault();
     const data = {
-      usuario: userRegister,
-      clave: passwordRegister
+      name: userRegister,
+      password: passwordRegister,
+      email: emailRegister
     };
     const allData = {
       method: 'POST',
@@ -45,7 +51,7 @@ function App() {
     };
     
     try {
-      await fetch('http://localhost:3000/register', allData);
+      await fetch('https://sena-27cfe8a4f38c.herokuapp.com/register', allData);
       fetchUsers();
     } catch(error) {
       console.error(error);
@@ -56,8 +62,8 @@ function App() {
     event.preventDefault();
 
     const data = {
-      usuario: usuario,
-      clave: clave
+      email: usuario,
+      password: clave
     };
 
     const allData = {
@@ -67,7 +73,7 @@ function App() {
       },
       body: JSON.stringify(data)
     };
-    const peticion = await fetch('http://localhost:3000/login', allData);
+    const peticion = await fetch('https://sena-27cfe8a4f38c.herokuapp.com/login', allData);
     const response = await peticion.json();
 
     localStorage.setItem('token', response.token);
@@ -88,7 +94,7 @@ function App() {
         'Authorization': 'Bearer ' + localStorage.getItem('token')
       }
     };
-    const peticion = await fetch('http://localhost:3000/validate', data);
+    const peticion = await fetch('https://sena-27cfe8a4f38c.herokuapp.com/validate', data);
     if (peticion.ok) {
       setLogueado(true);
       fetchUsers();
@@ -106,7 +112,7 @@ function App() {
         'Authorization': 'Bearer ' + localStorage.getItem('token')
       }
     };
-    const response = await fetch('http://localhost:3000/users', data);
+    const response = await fetch('https://sena-27cfe8a4f38c.herokuapp.com/users', data);
     const users = await response.json();
     setUsers(users);
   }
@@ -119,7 +125,7 @@ function App() {
         'Authorization': 'Bearer ' + localStorage.getItem('token')
       }
     };
-    await fetch(`http://localhost:3000/users/${id}`, data);
+    await fetch(`https://sena-27cfe8a4f38c.herokuapp.com/users/${id}`, data);
     fetchUsers();   }
 
   async function editUser(user) {
@@ -198,6 +204,15 @@ function App() {
               id="usuario"
               value={userRegister}
               onChange={handleRegisterUser}
+            />
+            <input
+              className='input'
+              placeholder="email"
+              type="email"
+              name="email"
+              id="email"
+              value={emailRegister}
+              onChange={handleRegisterEmail}
             />
             <input
               className='input'

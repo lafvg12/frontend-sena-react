@@ -40,7 +40,7 @@ function Converter() {
       }
     }
     try{
-      const data = await fetch('http://localhost:3000/users', options)
+      const data = await fetch('https://sena-27cfe8a4f38c.herokuapp.com/users', options)
       const parseData = await data.json()
       setAlluser([...parseData])
     }catch(error){
